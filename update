@@ -1,0 +1,34 @@
+#!/bin/bash
+
+FREEDOSISO="fdbasecd.iso"
+if [ "$1" != "" ] ; then
+	FREEDOSISO="$1"
+fi
+if ! [ -f "${FREEDOSISO}" ] ; then
+	echo "Error: file \"${FREEDOSISO}\" not found!"
+	echo "Please download an image from http://freedos.org"
+	exit 1
+fi
+
+echo "1- Mounting FreeDOS image (read-only)"
+mkdir -p mnt
+sudo mount -o loop fdbasecd.iso mnt >/dev/null 2>&1
+
+echo "2- Copying FreeDOS files to the work directory"
+mkdir -p work
+rsync -av mnt/ work/ >/dev/null 2>&1
+
+echo "3- Unmounting FreeDOS image"
+sudo umount mnt
+chmod -R +w work
+
+echo "4- Moving the BIOS update executables into the work directory"
+mkdir -p work/bios
+rsync -av bios/ work/bios/ >/dev/null 2>&1
+
+DATESTR=$( date +"%m-%d-%y" )
+ISOFILENAME="freedos-bios-updater-${DATESTR}.iso"
+echo "5- Building the new ISO file (${ISOFILENAME})"
+mkisofs -o "${ISOFILENAME}" -q -l -N -boot-info-table -iso-level 4 -no-emul-boot -b isolinux/isolinux.bin -publisher "TOCR - Mike Teehan <mteehan@tocr.com>" -A "FreeDOS 1.0 Distribution" -V FDOS_1.0 -v work/ >/dev/null 2>&1
+
+exit 0
