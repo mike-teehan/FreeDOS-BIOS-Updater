@@ -1,0 +1,6 @@
+# ignore the directories created by the script
+work/
+mnt/
+
+# ignore any .iso files
+*.iso
