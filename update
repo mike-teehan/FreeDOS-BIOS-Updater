@@ -15,6 +15,9 @@ mkdir -p mnt
 sudo mount -o loop fdbasecd.iso mnt >/dev/null 2>&1
 
 echo "2- Copying FreeDOS files to the work directory"
+if [ -d work ]; then
+	rm -rf work
+fi
 mkdir -p work
 rsync -av mnt/ work/ >/dev/null 2>&1
 
